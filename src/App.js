@@ -23,7 +23,7 @@ class App extends React.Component {
       .then(response => response.json())
       .then(data => {
         let woeid;
-        console.log(data);
+        
         if (data.length === 1) {
           woeid = data[0].woeid;
           this.setState({ woeid });
