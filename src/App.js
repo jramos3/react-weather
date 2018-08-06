@@ -14,52 +14,50 @@ class App extends React.Component {
     dataFound: false
   };
 
-  getWOEID = loc => {
-    this.setState({ loading: true });
+  getWeatherData = location => {
+    this.setState({ loading: true, dataFound: false });
+
     fetch(
-      `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/search/?query=${loc}`
+      `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/search/?query=${location}`
     )
       .then(response => response.json())
       .then(data => {
+        let woeid;
+        console.log(data);
         if (data.length === 1) {
-          const woeid = data[0].woeid;
-
-          woeid === this.state.woeid
-            ? this.setState({ loading: false })
-            : this.setState({ woeid });
+          woeid = data[0].woeid;
+          this.setState({ woeid });
         } else {
           this.setState({
-            loading: false,
             woeid: -1,
-            dataFound: false
+            loading: false
           });
         }
-      })
-      .catch(error => console.log(error));
-  };
 
-  getWeatherData = woeid => {
-    fetch(
-      `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`
-    )
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        const { title, location_type, consolidated_weather } = data;
-        const weatherData = {
-          title,
-          locationType: location_type,
-          consolidatedWeather:
-            this.state.reqType === "today"
-              ? consolidated_weather.slice(0, 1)
-              : consolidated_weather
-        };
-        this.setState({
-          weatherData,
-          loading: false,
-          dataFound: true
-        });
+        if (this.state.woeid !== -1) {
+          return fetch(
+            `https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`
+          )
+            .then(response2 => {
+              return response2.json();
+            })
+            .then(data => {
+              const { title, location_type, consolidated_weather } = data;
+              const weatherData = {
+                title,
+                locationType: location_type,
+                consolidatedWeather:
+                  this.state.reqType === "today"
+                    ? consolidated_weather.slice(0, 1)
+                    : consolidated_weather
+              };
+              this.setState({
+                weatherData,
+                loading: false,
+                dataFound: true
+              });
+            });
+        }
       })
       .catch(error => console.log(error));
   };
@@ -68,22 +66,15 @@ class App extends React.Component {
     this.setState({ reqType });
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (
-      prevState.woeid !== this.state.woeid ||
-      prevState.reqType !== this.state.reqType
-    ) {
-      this.setState({ dataFound: false });
-      this.getWeatherData(this.state.woeid);
-    }
-  }
-
   render() {
     const { loading, woeid, weatherData, dataFound } = this.state;
 
     return (
       <div>
-        <Search getWOEID={this.getWOEID} getReqType={this.getReqType} />
+        <Search
+          getWeatherData={this.getWeatherData}
+          getReqType={this.getReqType}
+        />
 
         {loading ? (
           <Spinner />

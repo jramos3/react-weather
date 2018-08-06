@@ -22,7 +22,7 @@ class Search extends React.Component {
           onClick={() => {
             if (this.locationRef.current.value !== "") {
               this.props.getReqType(this.reqTypeRef.current.value);
-              this.props.getWOEID(this.locationRef.current.value);
+              this.props.getWeatherData(this.locationRef.current.value);
               this.resetControls();
             }
           }}
